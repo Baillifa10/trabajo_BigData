@@ -1,0 +1,20 @@
+{
+  "Readme.Rmd": {
+    "Readme.html": "f8afc0c5"
+  },
+  "my_trabajo_BigData.qmd": {
+    "my_trabajo_BigData.html": "da28d50a"
+  },
+  "blog.qmd": {
+    "blog.html": "d384a6d9"
+  },
+  "posts/post_02_pinguinos.qmd": {
+    "post_02_pinguinos.html": "0670423f"
+  },
+  "posts/post_01_pinguinos.qmd": {
+    "post_01_pinguinos.html": "48b213f5"
+  },
+  "index.qmd": {
+    "index.html": "9e1bfb4b"
+  }
+}

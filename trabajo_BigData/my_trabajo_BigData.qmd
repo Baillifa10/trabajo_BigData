@@ -1,0 +1,289 @@
+---
+title: "Las páginas web más visitadas"
+description: |
+  Viendo qué páginas web son las más visitadas, de qué categoría son y de dónde proceden
+author:
+  - name: Adeline Baillifard (baillifa@alumni.uv.es)
+    affiliation: Universitat de València
+    affiliation-url: https://www.uv.es
+date: 2023-01-13
+categories: [trabajo BigData]
+title-block-banner: false
+title-block-banner-color: "#FFFFFF"
+toc: true
+toc-location: left
+toc-depth: 3
+smooth-scroll: true
+format: 
+  html:
+    link-external-newwindow: true
+    backgroundcolor: "#f2f7f6"
+    embed-resources: true
+---
+# Introducción
+
+Mi trabajo se divide en 3 partes: 
+
+- una lista de las páginas web más visitadas
+- las categorías y subcategorías de las páginas web más visitadas
+- los países de origen de las páginas web más visitadas
+
+## Datos
+
+Los datos vienen de <https://www.kaggle.com/>, plataforma web para concursos de ciencia de datos.
+
+```{r}
+#| code-fold: true
+
+#Datos
+datos <- rio::import("./datos/df_1.csv") 
+colnames(datos) <- as.character(datos[1,])
+datos <- datos[-1,]
+names(datos)[names(datos) == "NA"] <- "Position"
+names(datos)[names(datos) == "Principal country/territory"] <- "Country"
+datos$Position = datos$Position +1
+
+#Paquetes utilizados
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(plotly)
+library(knitr)
+library(gganimate)
+library(ggplot2)
+library(forcats)
+library(gt)
+library(gtExtras)
+library(tmap)
+library(sf)
+library(maps)
+library(mapdata)
+library(highcharter)
+
+```
+
+# Lista de las páginas web más visitadas
+
+Para empezar, veamos las páginas web más visitadas mediante una lista.
+
+```{r}
+#| code-fold: true
+
+  
+datos_1 <- datos %>% select (Position, Site, "Domain Name", Country)
+
+
+
+datos_1 <- datos_1 %>%
+  mutate(Country = case_when(
+    str_detect(Country,'United States') ~ "https://raw.githubusercontent.com/BjnNowak/TdF/main/us.png",
+    str_detect(Country,'China') ~ 'https://cdn-icons-png.flaticon.com/512/197/197375.png',
+    str_detect(Country,'Russia') ~ 'https://cdn-icons-png.flaticon.com/512/197/197408.png',
+    str_detect(Country,'Czech Republic') ~ 'https://cdn-icons-png.flaticon.com/512/8363/8363183.png',
+    str_detect(Country,'Canada') ~ 'https://cdn-icons-png.flaticon.com/512/197/197430.png',
+    str_detect(Country,'France') ~ 'https://raw.githubusercontent.com/BjnNowak/TdF/main/fr.png',
+    str_detect(Country,'Japan') ~ 'https://cdn-icons-png.flaticon.com/512/197/197604.png',
+    str_detect(Country,'South Korea') ~ 'https://cdn-icons-png.flaticon.com/512/197/197582.png',
+    str_detect(Country,'Cyprus') ~ 'https://cdn-icons-png.flaticon.com/512/4854/4854941.png',
+    str_detect(Country,'Brazil') ~ 'https://cdn-icons-png.flaticon.com/512/197/197386.png',
+    str_detect(Country,'Netherlands') ~ 'https://cdn-icons-png.flaticon.com/512/6157/6157397.png'
+  ))
+
+
+tab_1 <- datos_1 %>% 
+  gt(rowname_col = "Position") %>% 
+  tab_stubhead(label = md("**Position**"))
+
+tab_1 <- tab_1 %>%
+  tab_header(title = md("**Páginas Web más visitadas**"),
+                      subtitle = md("en orden")) %>%
+  gtExtras::gt_img_rows(columns = Country, height = 30)
+
+tab_1 <- tab_1 %>%
+  tab_style(
+    # Select object to modify
+    locations = cells_title(groups = 'title'),
+    # Specify text style
+    style = list(
+      cell_text(
+        font=google_font(name = 'Bebas Neue'), 
+        size='xx-large',
+        color='DarkCyan'
+  )))
+
+tab_1
+```
+
+# Categorías de las páginas web más visitadas
+
+## Categorías
+
+```{r}
+#| code-fold: true
+datos[datos == "Computers Electronics and Technology > Search Engines"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Email"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Social Media Networks"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Telecommunications"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Programming and Developer Software"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Consumer Electronics"] <- "Computers Electronics and Technology"
+datos[datos == "Computers Electronics and Technology > Other Computers Electronics and Technology"] <- "Computers Electronics and Technology"
+datos[datos == "Arts & Entertainment > Streaming & Online TV"] <- "Arts & Entertainment"
+datos[datos == "Arts & Entertainment > Animation and Comics"] <- "Arts & Entertainment"
+datos[datos == "Arts & Entertainment > Other Arts and Entertainment"] <- "Arts & Entertainment"
+datos[datos == "Reference Materials > Dictionaries and Encyclopedias"] <- "Reference Materials"
+datos[datos == "eCommerce & Shopping > Marketplace"] <- "eCommerce & Shopping"
+datos[datos == "Science and Education > Weather"] <- "Science and Education"
+datos[datos == "Games > Video Games Consoles and Accessories"] <- "Games"
+datos[datos == "Travel and Tourism > Accommodation and Hotels"] <- "Travel and Tourism" 
+
+
+
+datos_2 <- datos %>% mutate(Category = forcats::as_factor(Category)) #- convertimos la v. category a factor con la f. as_factor()
+datos_2 <- datos_2 %>% mutate(Category = forcats::fct_infreq(Category)) #- fct_infreq() los niveles del factor según su frecuencia de mayor a menor
+p1 <- ggplot(datos_2, aes(fct_rev(Category))) 
+p1 <- p1 + geom_bar(fill = "DarkCyan") + xlab("Categoría de los sitios Web") + ylab("Cantidad") + coord_flip()
+
+
+plotly::ggplotly(p1)
+
+```
+
+
+Las categorías de páginas web más visitadas son "electrónica y tecnología informática", "editores de noticias y medios de comunicación" y páginas para adultos.
+
+## Subcategorías
+
+::: {.panel-tabset}
+
+## Subcategorías de las páginas web más visitadas
+
+```{r}
+#| code-fold: true
+datos <- rio::import("./datos/df_1.csv") 
+colnames(datos) <- as.character(datos[1,])
+datos <- datos[-1,]
+names(datos)[names(datos) == "NA"] <- "Position"
+names(datos)[names(datos) == "Principal country/territory"] <- "Country"
+datos$Position = datos$Position +1
+
+datos <- datos %>%
+  separate(col = "Category",
+           into = paste0("Category", 1:2), sep = ">",
+           extra = "merge") %>%
+  drop_na()
+
+datos_4 <- datos %>%
+  select(Category2, Category1) %>%
+  count(Category2, Category1) %>%
+  drop_na()
+
+names(datos_4)[names(datos_4) == "Category2"] <- "Subcategoría"
+names(datos_4)[names(datos_4) == "Category1"] <- "Categoría"
+names(datos_4)[names(datos_4) == "n"] <- "Cantidad"
+
+p3 <- ggplot(datos_4, aes(x = Subcategoría, y = Cantidad, color = Categoría)) + geom_point() + coord_flip()
+
+p3 + transition_states(
+    Categoría,
+    transition_length = 2,
+    state_length = 10)
+
+
+```
+
+La categoría más grande, "Electrónica y tecnología informática", incluye las páginas web de telecomunicaciones, redes sociales, motores de búsqueda, software de programación y desarrollo, correo electrónico y electrónica de consumo. Así pues, las más básicas páginas web, las que utilizamos a diario. La mayoría de la páginas están en la subcategoría de redes sociales.
+
+La categoría "Arte y Entretenimiento" incluye la televisión en streaming y en línea y las animaciones y cómics.
+
+## Otra forma de considerar las subcategorías
+
+```{r}
+#| code-fold: true
+p2 <- ggplot(datos_4, aes(x = Subcategoría, y = Cantidad)) + geom_point() + coord_flip()
+
+p2 + facet_wrap(vars(Categoría),  nrow = 10, ncol = 10)
+
+```
+
+:::
+
+# Países de origen de las páginas web
+
+::: {.panel-tabset}
+
+## Con highcharter
+
+```{r}
+#| code-fold: true
+
+datos <- rio::import("./datos/df_1.csv") 
+colnames(datos) <- as.character(datos[1,])
+datos <- datos[-1,]
+names(datos)[names(datos) == "NA"] <- "Position"
+names(datos)[names(datos) == "Principal country/territory"] <- "Country"
+datos$Position = datos$Position +1
+
+datos_3 <- datos %>%
+  select(Country) %>%
+  count(Country)
+
+datos_3[datos_3 == "Russia"] <- "Russian Federation"
+datos_3[datos_3 == "South Korea"] <- "Republic of Korea"
+
+dat <- iso3166
+dat <- rename(dat, "iso-a3" = a3)
+
+mapa <- full_join(dat, datos_3, by = c("ISOname" = "Country"))
+mapa[is.na(mapa)] <- 0
+mapa <- mapa[-82,]
+mapa <- mapa[-48,]
+
+hcmap(
+  map = "custom/world-highres3", # high resolution world map
+  data = mapa, # name of dataset
+  joinBy = "iso-a3",
+  value = "n",
+  showInLegend = FALSE, # hide legend
+  download_map_data = TRUE
+) %>%
+  hc_mapNavigation(enabled = FALSE) %>%
+  hc_legend("none") %>%
+  hc_title(text = "Cantidad de páginas web por país de origen") %>%
+  hc_colorAxis(minColor = "#d1ebeb", maxColor = "#008b8b")
+
+```
+
+## Con tmap
+
+```{r}
+#| code-fold: true
+
+datos_3 <- datos %>%
+  select(Country) %>%
+  count(Country)
+
+datos_3[datos_3 == "Czech Republic"] <- "Czech Rep."
+datos_3[datos_3 == "South Korea"] <- "Korea"
+
+
+data(World) 
+world <- World ; rm(World)
+
+
+world <- world %>% filter(continent != "Antarctica") %>% filter(name != "Greenland")
+aa <- ggplot() + geom_sf(data = world) + theme_void()
+world <- world %>% select(name, geometry)
+
+map2 <- full_join(datos_3, world, by = c("Country" = "name"))
+
+map3 <- map2 %>% 
+  ggplot + geom_sf (data = map2, aes(geometry = geometry , fill = n)) + scale_fill_viridis_c(option = "mako", trans = "sqrt") + labs(title = "Cantidad de páginas web por país de origen", subtitle = "(más claro mayor, más oscuro menor)") 
+
+map3
+
+```
+
+:::
+
+Aquí vemos que los mapas están muy vacíos porque la mayoría de los sitios web más visitados del mundo proceden de EE.UU. (30), Rusia (5) y China (4). Podemos concluir que las potencias mundiales poseen casi todas las principales páginas web.
+

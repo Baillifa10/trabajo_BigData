@@ -1,0 +1,6 @@
+"0","data <- get_eurostat(table_data, time_format = 'raw', keepFlags = TRUE)
+"
+"2","Reading cache file C:\Users\adeli\AppData\Local\Temp\RtmpK8GiJa/eurostat/nrg_bal_s_raw_code_FT.rds
+"
+"2","Table  nrg_bal_s  read from cache file:  C:\Users\adeli\AppData\Local\Temp\RtmpK8GiJa/eurostat/nrg_bal_s_raw_code_FT.rds
+"

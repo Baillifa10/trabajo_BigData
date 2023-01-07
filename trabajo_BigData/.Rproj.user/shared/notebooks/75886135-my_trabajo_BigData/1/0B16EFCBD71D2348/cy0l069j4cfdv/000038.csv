@@ -1,0 +1,23 @@
+"0","tab_1 %>%
+  tab_style(
+    # Select object to modify
+    locations = cells_title(groups = 'title'),
+    # Specify text style
+    style = list(
+      cell_text(
+        font=google_font(name = 'Bebas Neue'), 
+        size='xx-large',
+        color='DarkCyan'
+  )))
+"
+"0","tab_1 %>%"
+"0","  tab_style("
+"0","    # Select object to modify"
+"0","    locations = cells_title(groups = 'title'),"
+"0","    # Specify text style"
+"0","    style = list("
+"0","      cell_text("
+"0","        font=google_font(name = 'Bebas Neue'), "
+"0","        size='xx-large',"
+"0","        color='DarkCyan'"
+"0","  )))"
